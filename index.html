@@ -242,7 +242,15 @@ const TA={
   tel:'2106980458',
   mob:'6936980458',
   addr:'ΚΑΛΑΒΡΥΤΩΝ 8Α, ΧΑΛΑΝΔΡΙ, ΤΚ 15234',
-  email:'syannakis@hotmail.com'
+  email:'syannakis@hotmail.com',
+  /* στοιχεία επιχείρησης (κεφαλίδα και κάτω μέρος του δελτίου) */
+  biz:'ΓΙΑΝΝΑΚΗΣ ΣΤΕΦΑΝΟΣ SGSTEAM',
+  bizAct:'ΗΛΕΚΤΡΟΜΗΧΑΝΟΛΟΓΙΚΕΣ ΕΦΑΡΜΟΓΕΣ',
+  gemi:'67948603000',
+  afm:'076119421',
+  doy:'ΚΕΦΟΔΕ Αττικής',
+  bizAddr:'ΜΕΣΣΗΝΙΑΣ 27, ΧΑΛΑΝΔΡΙ 15234, ΕΛΛΑΔΑ',
+  bizTel:'2106980458'
 };
 
 /* ===== Εταιρείες (από το αρχείο συμβάσεων). a = εγκαταστάσεις/διευθύνσεις ===== */
@@ -303,7 +311,7 @@ const uniq=a=>[...new Set(a)];
 const byEl=(x,y)=>x.localeCompare(y,'el',{sensitivity:'base'});
 
 $('taName').textContent='Τεχνικός Ασφαλείας: '+TA.name;
-$('taSub').textContent='Α.Μ. '+TA.am+' · Κιν. '+fmtTel(TA.mob);
+$('taSub').textContent=TA.biz+' · '+TA.bizAct;
 
 /* ===== Ημερομηνία πάντα ηη/μμ/εεεε ===== */
 const _val=Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value');
@@ -475,7 +483,7 @@ function buildSheet(d){
   const hrs=(d.t1||d.t2)?'<div class="f"><span class="k">Ώρα άφιξης – αναχώρησης:</span><span class="v">'+esc([d.t1,d.t2].filter(Boolean).join(' – '))+(dur!==null?'  ('+hhmm(dur)+' ώρες)':'')+'</span></div>':'';
   $('sheet').innerHTML=
    '<div class="top"><div class="tt"><b>Δελτίο Επισκέψεων</b><span>ΤΕΧΝΙΚΟΥ ΑΣΦΑΛΕΙΑΣ</span></div>'+
-   '<div class="ta"><b>'+esc(TA.name)+'</b><br>'+esc(TA.title)+'<br>Αρ. Μ. Τεχνικών Ασφάλειας: '+esc(TA.am)+'<br>'+esc(TA.addr)+'<br>Τηλ/Φαξ: '+esc(TA.tel)+' · Κιν: '+esc(TA.mob)+'<br>'+esc(TA.email)+'</div></div>'+
+   '<div class="ta"><b>'+esc(TA.biz)+'</b><br>'+esc(TA.bizAct)+'<br>Αρ. ΓΕΜΗ: '+esc(TA.gemi)+'<br>ΑΦΜ: '+esc(TA.afm)+', ΔΟΥ: '+esc(TA.doy)+'<br>'+esc(TA.bizAddr)+'<br>Τηλ: '+esc(TA.bizTel)+'</div></div>'+
    '<div class="f"><span class="k">Εταιρεία:</span><span class="v">'+esc(d.comp)+'</span></div>'+
    '<div class="f"><span class="k">Εγκατάσταση:</span><span class="v">'+esc(d.inst)+'</span></div>'+
    '<div class="f"><span class="k">Ημερομηνία Επίσκεψης:</span><span class="v">'+grDate(d.date)+'</span></div>'+
@@ -485,7 +493,7 @@ function buildSheet(d){
    (d.byta?'<div class="byta"><span class="cb on"></span>Καταχώρηση υποδείξεων στο Ηλεκτρονικό ΒΥΤΑ</div>':'')+
    '<div class="sign"><div><div class="h">Τεχνικός Ασφαλείας</div><div class="s">Υπογραφή - Σφραγίδα</div><div class="ar">'+(d.stamp?stampHtml():'')+(d.sigT?'<img class="st" src="'+d.sigT+'" alt="">':'')+'</div></div>'+
    '<div class="r"><div class="h">Για την Εγκατάσταση</div><div class="s">Υπογραφή - Σφραγίδα</div><div class="ar">'+(d.sigC?'<img class="sc" src="'+d.sigC+'" alt="">':'')+(d.signer?'<div class="nm">'+esc(d.signer)+'</div>':'')+'</div></div></div>'+
-   '<div class="foot"><span>'+esc(TA.name)+' · Τεχνικός Ασφαλείας · Α.Μ. '+esc(TA.am)+'</span><span>'+esc(TA.email)+' · '+esc(TA.mob)+'</span></div>'+
+   '<div class="foot"><span>'+esc(TA.biz)+' · ΑΦΜ '+esc(TA.afm)+' · ΔΟΥ '+esc(TA.doy)+'</span><span>Τηλ: '+esc(TA.bizTel)+'</span></div>'+
    (d.nphotos?'<div class="foot" style="border:0;margin-top:2px;padding:0">Συνημμένες φωτογραφίες: '+d.nphotos+' (στις επόμενες σελίδες)</div>':'');
 }
 async function makePdf(d){
@@ -530,7 +538,7 @@ function finishOut(d){
   lastName=['TA',safe(d.comp,28),c&&c.a.length>1&&d.inst?safe(d.inst,20):'',grDate(d.date).replace(/\//g,'-')].filter(Boolean).join('_')+'.pdf';
   $('esub').value='Δελτίο Επίσκεψης Τεχνικού Ασφαλείας '+grDate(d.date)+' – '+d.comp;
   $('ebody').value='Καλησπέρα σας,\n\nσας αποστέλλουμε συνημμένο το Δελτίο Επίσκεψης Τεχνικού Ασφαλείας της '+grDate(d.date)+
-    (d.inst?' για την εγκατάσταση '+d.inst:'')+'.\n\nΜε εκτίμηση,\n'+TA.name+'\nΤεχνικός Ασφαλείας\nΚιν. '+TA.mob+'\n'+TA.email;
+    (d.inst?' για την εγκατάσταση '+d.inst:'')+'.\n\nΜε εκτίμηση,\n'+TA.biz+'\n'+TA.bizAct+'\nΤηλ. '+TA.bizTel;
 }
 $('make').onclick=async()=>{
   const d=collect();
