@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="el"><head><meta charset="utf-8"><title>Δελτίο Επισκέψεων Τεχνικού Ασφαλείας</title>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#2e3a87">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Δελτίο ΤΑ">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="stylesheet" href="fonts.css">
+<style>
+/* Μία στήλη για κινητό στο πεδίο — κάρτες ανά ενότητα του εντύπου, μεγάλα πεδία αφής */
+:root{
+  --bg:#eef0f6;--card:#ffffff;--tx:#18202e;--mut:#5d6679;--bd:#d4d8e4;
+  --ac:#2e3a87;--ac-tx:#ffffff;--err:#b42318;--ok:#1b7a43;--field:#f6f7fb;--on:#e5e8f7;
+  --f-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#11141c;--card:#1a1f2b;--tx:#e9ecf4;--mut:#959db0;--bd:#2c3344;
+  --ac:#8c9bf0;--ac-tx:#0d1020;--err:#ff7b6e;--ok:#5fd08f;--field:#131722;--on:#232b48;color-scheme:dark}}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.45 var(--f-body);
+  padding:calc(16px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) calc(40px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px))}
+.wrap{max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+.head{display:flex;align-items:center;gap:14px;min-height:56px}
+.head img{width:48px;height:48px;border-radius:10px;flex:none}
+.head h1{margin:0;font-size:21px;font-weight:700;line-height:1.2;text-wrap:balance}
+.head h1 small{display:block;font-size:13px;font-weight:500;color:var(--mut)}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:4px}
+.card h2{margin:0 0 4px;font-size:12px;font-weight:600;letter-spacing:.08em;color:var(--mut)}
+.card h2 small{font-weight:500;letter-spacing:0;font-size:12px}
+label{font-size:13px;color:var(--mut);margin-top:8px}
+input,textarea{width:100%;font:inherit;color:var(--tx);background:var(--field);border:1px solid var(--bd);border-radius:9px;padding:11px;min-width:0}
+input:focus-visible,textarea:focus-visible,button:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
+textarea{min-height:150px;resize:vertical}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.row>div{display:flex;flex-direction:column;min-width:0}
+.hint{font-size:13px;color:var(--mut);font-variant-numeric:tabular-nums}
+button{font:inherit;font-weight:600;border:0;border-radius:11px;padding:14px;background:var(--ac);color:var(--ac-tx);cursor:pointer}
+button.sec{background:transparent;color:var(--ac);border:1px solid var(--ac)}
+button.sm{padding:8px 14px;font-size:14px;align-self:flex-start}
+button:disabled{opacity:.5;cursor:default}
+.ck{display:flex;align-items:flex-start;gap:10px;margin:6px 0 0;padding:10px 12px;border:1px solid var(--bd);border-radius:9px;background:var(--field);color:var(--tx);font-size:15px;cursor:pointer}
+.ck input{width:20px;height:20px;flex:none;margin:1px 0 0;accent-color:var(--ac);padding:0}
+.ck:has(input:checked){background:var(--on);border-color:var(--ac)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:2px 0 8px}
+.chips button{padding:7px 11px;font-size:13.5px;font-weight:500;background:var(--on);color:var(--ac);border:1px solid transparent;border-radius:16px;text-align:left}
+canvas.sig{width:100%;height:170px;background:#fff;border:1px dashed var(--bd);border-radius:9px;touch-action:none;display:block;margin-top:6px}
+.sigbtns{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+.thumbs{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.thumbs div{position:relative}
+.thumbs img{width:84px;height:84px;object-fit:cover;border-radius:9px;display:block}
+.thumbs button{position:absolute;top:-6px;right:-6px;width:26px;height:26px;padding:0;border-radius:50%;background:var(--err);color:#fff;line-height:26px}
+.msg{min-height:1.4em;text-align:center;font-weight:600}
+.msg.err{color:var(--err)}.msg.ok{color:var(--ok)}
+.actions{display:flex;flex-direction:column;gap:10px}
+.chip{display:flex;flex-direction:column;background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:12px 14px;font-size:14px;color:var(--mut)}
+.chip b{color:var(--tx);font-size:15px}
+.dfield{position:relative;display:flex;gap:8px;min-width:0}
+.dfield input[type=text]{flex:1;font-variant-numeric:tabular-nums;padding-inline:8px}
+.dfield input.bad,input.tm.bad{border-color:var(--err)}
+.dfield .calbtn{flex:none;padding:0 10px;background:transparent;color:var(--ac);border:1px solid var(--bd);display:flex;align-items:center}
+.dfield .native{position:absolute;right:0;bottom:0;width:1px;height:1px;opacity:0;pointer-events:none;border:0;padding:0}
+input.tm{font-variant-numeric:tabular-nums}
+.pm{position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:20px;z-index:20}
+.box{background:var(--card);border-radius:14px;padding:18px;width:100%;max-width:420px;display:flex;flex-direction:column;gap:10px;height:100%;max-height:680px}
+.box h2{margin:0 0 4px;font-size:18px;text-align:center}
+@media (max-width:600px){.pm{padding:0;align-items:flex-end}.pm .box{max-width:none;max-height:none;height:92%;border-radius:16px 16px 0 0;padding:16px 14px calc(14px + env(safe-area-inset-bottom,0px))}}
+.combo{position:relative;display:flex;gap:8px;min-width:0}.combo input{flex:1;min-width:0}
+.combo .cbtn{flex:none;width:48px;padding:0;background:var(--on);color:var(--ac);border:1px solid var(--bd);display:flex;align-items:center;justify-content:center}
+.sugg{position:absolute;left:0;right:56px;top:calc(100% + 4px);z-index:15;background:var(--card);border:1px solid var(--bd);border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.18);max-height:min(50vh,320px);overflow:auto;padding:4px}
+.sugg button{display:block;width:100%;text-align:left;background:transparent;color:var(--tx);border:0;border-radius:7px;padding:11px 12px;font-weight:500;white-space:normal;overflow-wrap:anywhere;line-height:1.35}
+.sugg button+button{border-top:1px solid var(--bd);border-radius:0}
+.pbtns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.plist{flex:1;overflow:auto;display:flex;flex-direction:column;gap:6px;min-height:0}
+.plist button{display:block;flex:none;width:100%;text-align:left;background:var(--field);color:var(--tx);border:1px solid var(--bd);padding:12px 14px;font-weight:500;white-space:normal;overflow-wrap:anywhere;line-height:1.35;min-height:46px}
+.plist button.cur{border-color:var(--ok);box-shadow:inset 3px 0 0 var(--ok)}
+.plist button.free{border-style:dashed;color:var(--ac)}
+.plist button.mine{border-color:var(--ac);background:var(--on)}
+.plist .empty{color:var(--mut);text-align:center;padding:20px 0}
+.plist .sep{font-size:12px;color:var(--mut);letter-spacing:.06em;margin:6px 0 0}
+.savebtns{display:grid;gap:10px}
+#done{border-color:var(--ok)}
+.copyrow{display:flex;gap:8px;align-items:stretch}
+.copyrow input,.copyrow textarea{flex:1}
+.copyrow textarea{min-height:120px}
+.copyrow button{padding:8px 12px;font-size:14px}
+.confirm{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.confirm span{flex:1 1 100%;font-weight:600}
+.confirm button{flex:1}
+#pv{background:#fff;border:1px solid var(--bd);border-radius:12px;overflow:hidden;position:relative}
+#pv #sheet{position:absolute;left:0;top:0;transform-origin:0 0}
+
+/* ===== Φύλλο PDF: αντίγραφο του εντύπου «Δελτίο Επισκέψεων», πάντα σε χαρτί ===== */
+#sheet{position:fixed;left:-10000px;top:0;width:794px;background:#fff;color:#1e2246;font:13px/1.4 var(--f-body);padding:40px 48px 30px}
+#sheet *{box-sizing:border-box}
+#sheet .top{display:flex;justify-content:space-between;align-items:flex-start;gap:24px;margin-bottom:26px}
+#sheet .top .tt b{display:block;font-size:27px;font-weight:700;color:#23285a;letter-spacing:.01em}
+#sheet .top .tt span{display:block;font-size:13px;color:#4a5080;font-weight:600;letter-spacing:.06em;margin-top:2px}
+#sheet .top .ta{border-left:3px solid #2e3a87;padding:2px 0 2px 12px;font-size:10.5px;line-height:1.45;color:#3a3f66;text-align:left;max-width:330px}
+#sheet .top .ta b{font-size:12px;color:#23285a;letter-spacing:.03em}
+#sheet .f{display:flex;align-items:flex-end;gap:10px;margin-bottom:14px}
+#sheet .f .k{flex:none;font-size:15px;color:#3a3f66}
+#sheet .f .v{flex:1;border-bottom:1px solid #8e94b8;min-height:26px;padding:0 4px 2px;font-size:16px;font-weight:600;color:#1b2a8f;white-space:pre-wrap;word-break:break-word}
+#sheet .pk{font-size:15px;font-weight:700;color:#23285a;margin-top:20px}
+#sheet .txt div{min-height:30px;border-bottom:1px solid #b5bad3;padding:6px 4px 3px;font-size:15px;color:#1b2a8f;white-space:pre-wrap;word-break:break-word}
+#sheet .byta{margin-top:12px;font-size:13.5px;color:#23285a;font-weight:600}
+#sheet .cb{display:inline-block;width:13px;height:13px;border:1.4px solid #23285a;margin-right:8px;vertical-align:-2px;position:relative;background:#fff}
+#sheet .cb.on::after{content:"✕";position:absolute;inset:-3px 0 0 0;text-align:center;font-size:12px;line-height:15px;font-weight:700;color:#1b2a8f}
+#sheet .sign{display:grid;grid-template-columns:1fr 1fr;gap:50px;margin-top:30px}
+#sheet .sign .h{font-size:15px;font-weight:700;color:#23285a}
+#sheet .sign .s{font-size:14px;color:#4a5080;margin-bottom:6px}
+#sheet .sign .r{text-align:right}
+#sheet .sign .ar{position:relative;height:150px}
+#sheet .stamp{position:absolute;left:4px;bottom:6px;color:#1f2a7c;font-weight:700;font-size:13px;line-height:1.3;letter-spacing:.02em;transform:rotate(-3deg);transform-origin:left bottom;opacity:.92;text-align:center}
+#sheet .stamp div:first-child{font-size:15px}
+#sheet .ar img{position:absolute;max-height:120px;max-width:100%}
+#sheet .ar img.st{left:10px;top:0}
+#sheet .ar img.sc{right:0;top:10px}
+#sheet .ar .nm{position:absolute;right:0;bottom:0;font-size:13px;color:#1b2a8f;font-weight:600;text-align:right}
+#sheet .foot{margin-top:28px;border-top:1px solid #c9cde0;padding-top:8px;font-size:10.5px;color:#5a5f80;display:flex;justify-content:space-between;gap:16px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style></head><body>
+
+<div class="wrap" id="formwrap">
+  <div class="head"><img src="icon-192.png" alt=""><h1>Δελτίο Επισκέψεων<small>Τεχνικού Ασφαλείας</small></h1></div>
+  <div class="chip"><b id="taName"></b><span id="taSub"></span></div>
+
+  <div class="card">
+    <h2>ΣΤΟΙΧΕΙΑ ΕΠΙΣΚΕΨΗΣ</h2>
+    <label for="comp">Εταιρεία *</label><input id="comp" placeholder="Γράψε ή πάτα ▾ για λίστα">
+    <label for="inst">Εγκατάσταση</label><input id="inst" placeholder="Γράψε ή πάτα ▾ για λίστα"><div class="hint" id="ihint"></div>
+    <label for="date">Ημερομηνία επίσκεψης *</label><input id="date" type="date">
+    <label for="contact">Όνομα υπεύθυνου επικοινωνίας</label><input id="contact" autocomplete="off" placeholder="π.χ. κα Ιωαννίδου">
+    <div class="row">
+      <div><label for="t1">Ώρα άφιξης</label><input id="t1" class="tm" inputmode="numeric" placeholder="ωω:λλ" maxlength="5" autocomplete="off"></div>
+      <div><label for="t2">Ώρα αναχώρησης</label><input id="t2" class="tm" inputmode="numeric" placeholder="ωω:λλ" maxlength="5" autocomplete="off"></div>
+    </div>
+    <div class="hint" id="dur">Οι ώρες είναι προαιρετικές· αν τις συμπληρώσεις, γράφονται στο δελτίο.</div>
+  </div>
+
+  <div class="card">
+    <h2>ΠΑΡΑΤΗΡΗΣΕΙΣ</h2>
+    <div class="hint">Πάτα για γρήγορη προσθήκη:</div>
+    <div class="chips" id="chips"></div>
+    <textarea id="notes" aria-label="Παρατηρήσεις"></textarea>
+    <label class="ck"><input type="checkbox" id="byta">Καταχώρηση υποδείξεων στο Ηλεκτρονικό ΒΥΤΑ</label>
+  </div>
+
+  <div class="card">
+    <h2>ΦΩΤΟΓΡΑΦΙΕΣ <small>(προαιρετικά, μπαίνουν σε επόμενες σελίδες)</small></h2>
+    <input id="photo" type="file" accept="image/*" multiple>
+    <div class="thumbs" id="thumbs"></div>
+  </div>
+
+  <div class="card">
+    <h2>ΤΕΧΝΙΚΟΣ ΑΣΦΑΛΕΙΑΣ <small>/ ΥΠΟΓΡΑΦΗ - ΣΦΡΑΓΙΔΑ</small></h2>
+    <canvas class="sig" id="sigT" aria-label="Υπογραφή τεχνικού ασφαλείας"></canvas>
+    <div class="sigbtns"><button class="sec sm" id="sigTclr" type="button">Σβήσιμο υπογραφής</button></div>
+    <label class="ck"><input type="checkbox" id="keepSig">Να θυμάται η συσκευή την υπογραφή μου</label>
+    <label class="ck"><input type="checkbox" id="stampOn">Σφραγίδα Τεχνικού Ασφαλείας στο PDF</label>
+  </div>
+
+  <div class="card">
+    <h2>ΓΙΑ ΤΗΝ ΕΓΚΑΤΑΣΤΑΣΗ <small>/ ΥΠΟΓΡΑΦΗ - ΣΦΡΑΓΙΔΑ</small></h2>
+    <label for="signer" style="margin-top:0">Ονοματεπώνυμο υπογράφοντος</label><input id="signer" autocomplete="off">
+    <canvas class="sig" id="sigC" aria-label="Υπογραφή για την εγκατάσταση"></canvas>
+    <div class="sigbtns"><button class="sec sm" id="sigCclr" type="button">Σβήσιμο υπογραφής</button></div>
+  </div>
+
+  <div class="actions">
+    <button id="make" type="button">Δημιουργία PDF</button>
+    <div class="msg" id="msg" role="status"></div>
+  </div>
+
+  <div class="card" id="done" hidden>
+    <h2>ΤΟ ΔΕΛΤΙΟ ΕΙΝΑΙ ΕΤΟΙΜΟ</h2>
+    <div class="savebtns">
+      <button id="save" type="button">Αποθήκευση στη συσκευή</button>
+      <div class="hint" id="saveinfo"></div>
+      <button id="share" class="sec" type="button">Αποστολή (Email, Viber κ.λπ.)</button>
+      <div class="hint">Ανοίγει το μενού κοινοποίησης με το PDF ήδη συνημμένο.</div>
+      <button id="linkb" class="sec" type="button">Αντιγραφή link δελτίου</button>
+      <div class="hint" id="linkinfo">Όποιος ανοίξει το link βλέπει το δελτίο και κατεβάζει το PDF.</div>
+      <textarea id="linkbox" readonly hidden style="min-height:70px;font-size:12px"></textarea>
+    </div>
+    <label for="esub">Θέμα</label>
+    <div class="copyrow"><input id="esub" readonly><button class="sec" type="button" data-copy="esub">Αντιγραφή</button></div>
+    <label for="ebody">Κείμενο email</label>
+    <div class="copyrow"><textarea id="ebody" readonly></textarea><button class="sec" type="button" data-copy="ebody">Αντιγραφή</button></div>
+  </div>
+
+  <div class="actions">
+    <button class="sec" id="newb" type="button">Νέο δελτίο</button>
+    <div class="confirm" id="confirm" hidden>
+      <span>Να καθαρίσουν όλα τα πεδία;</span>
+      <button id="yes" type="button">Ναι, νέο δελτίο</button>
+      <button class="sec" id="no2" type="button">Άκυρο</button>
+    </div>
+  </div>
+</div>
+
+<div class="wrap" id="viewer" hidden>
+  <div class="head"><img src="icon-192.png" alt=""><h1>Δελτίο Επισκέψεων<small>Τεχνικού Ασφαλείας</small></h1></div>
+  <div class="card">
+    <h2 id="vtitle">ΔΕΛΤΙΟ ΕΠΙΣΚΕΨΗΣ</h2>
+    <div class="hint" id="vsub"></div>
+    <div class="savebtns" style="margin-top:8px">
+      <button id="vsave" type="button" disabled>Λήψη PDF</button>
+      <button id="vshare" class="sec" type="button" disabled>Αποστολή PDF (Email, Viber κ.λπ.)</button>
+    </div>
+    <div class="msg" id="vmsg" role="status"></div>
+  </div>
+  <div id="pv" aria-label="Προεπισκόπηση δελτίου"></div>
+  <div class="actions"><button class="sec" id="vnew" type="button">Νέο κενό δελτίο</button></div>
+</div>
+
+<div id="pmodal" class="pm" role="dialog" aria-modal="true" aria-labelledby="pmt" hidden><div class="box">
+  <h2 id="pmt"></h2>
+  <input id="psearch" type="search" placeholder="Αναζήτηση ή πληκτρολόγηση…" autocomplete="off" aria-label="Αναζήτηση">
+  <div class="plist" id="ppick"></div>
+  <div class="pbtns"><button class="sec" id="pclear" type="button">Καθαρισμός</button><button class="sec" id="pclose" type="button">Κλείσιμο</button></div>
+</div></div>
+
+<div id="sheet" aria-hidden="true"></div>
+
+<script src="html2canvas.min.js"></script>
+<script src="jspdf.umd.min.js"></script>
+<script>
+/* ===== Στοιχεία Τεχνικού Ασφαλείας (αλλάζουν εδώ) ===== */
+const TA={
+  name:'ΓΙΑΝΝΑΚΗΣ ΣΤΕΦΑΝΟΣ',
+  stampName:'ΣΤΕΦΑΝΟΣ Δ. ΓΙΑΝΝΑΚΗΣ',
+  title:'ΕΝΕΡΓΕΙΑΚΟΣ ΜΗΧΑΝΟΛΟΓΟΣ ΜΗΧΑΝΙΚΟΣ ΤΕ',
+  am:'330445',
+  tel:'2106980458',
+  mob:'6936980458',
+  addr:'ΚΑΛΑΒΡΥΤΩΝ 8Α, ΧΑΛΑΝΔΡΙ, ΤΚ 15234',
+  email:'syannakis@hotmail.com'
+};
+
+/* ===== Εταιρείες (από το αρχείο συμβάσεων). a = εγκαταστάσεις/διευθύνσεις ===== */
+const ACTIVE=[
+ {n:'ΤΟ ΚΟΥΛΟΥΡΑΔΙΚΟ',a:['Μαγνησίας 24, Νέα Ιωνία 142 32']},
+ {n:'ACCOTAX',a:['ΑΡΙΣΤΟΦΑΝΟΥΣ 4 - ΧΑΛΑΝΔΡΙ']},
+ {n:'ΤΕΧΝΟΠΟΛΙΣ ΓΚΑΖΙ ΑΝΩΝΥΜΗ ΕΤΑΙΡΕΙΑ ΟΤΑ ΠΡΟΣΤΑΣΙΑΣ ΚΑΙ ΑΝΑΔΕΙΞΗΣ ΒΙΟΜΗΧΑΝΙΚΟΥ-ΑΡΧΑΙΟΛΟΓΙΚΟΥ ΠΑΡΚΟΥ ΑΘΗΝΩΝ',a:['ΠΕΙΡΑΙΩΣ 100','Δημοτική Αγορά Κυψέλης, Φωκίωνος Νέγρη 42, Αθήνα','ΜΟΥΣΕΙΟ ΜΑΡΙΑ ΚΑΛΑΣ, Μητροπόλεως 44, Αθήνα']},
+ {n:'BOMBOBAR \\ ΣΕΝΑ',a:['Κοιμήσεως Θεοτόκου 9, Κωνσταντινουπόλεως 18, Αγ. Στέφανος 145 65']},
+ {n:'GRINDEKS KALCEKS ΕΛΛΑΔΑ ΜΟΝΟΠΡΟΣΩΠΗ ΑΝΩΝΥΜΗ ΕΤΑΙΡΕΙΑ',a:['Λεωφ. Ανδρέα Συγγρού 294, Καλλιθέα 176 73']},
+ {n:'EG FMS Ε.Ε.',a:['Μιλτιάδου 23, Νέα Ιωνία 142 31']},
+ {n:'Β ΚΑΛΙΩΡΑΣ ΔΙΑΓΝΩΣΙΣ ΙΑΤΡΙΚΗ ΙΔΙΩΤΙΚΗ ΚΕΦΑΛΑΙΟΥΧΙΚΗ ΕΤΑΙΡΕΙΑ',a:['Δευκαλίωνος 31-33, Αθήνα 112 54']},
+ {n:'ΠΑΠΑΚΩΣΤΟΠΟΥΛΟΣ ΜΙΧΑΗΛ ΑΝΔΡΕΑΣ',a:['ΜΥΡΙΩΝΗ 1 - ΙΛΙΟΝ']},
+ {n:'Λ. ΣΟΥΡΛΑΤΖΗΣ-Γ. ΜΠΟΥΤΣΙΟΣ ΟΕ',a:['ΣΑΟΥΜΠΕΡΤ ΕΔΟΥΑΡΔΟΥ 4 - ΠΕΙΡΑΙΑΣ, 18541']},
+ {n:'Ε ΠΑΛΑΜΙΔΑΣ ΚΑΙ Δ ΠΑΛΑΜΙΔΑΣ ΟΕ',a:['ΑΓ ΠΑΡΑΣΚΕΥΗΣ 72']},
+ {n:'ΤΟΛΟΥΜΗΣ ΓΕΩΡΓΙΟΣ',a:['Λ ΚΗΦΙΣΙΑΣ 94']},
+ {n:'GMT NORMAXIS ΜΟΝΟΠΡΟΣΩΠΗ ΕΠΕ',a:['ΛΕΩΦΟΡΟΣ ΚΗΦΙΣΙΑΣ 6-8 - ΜΑΡΟΥΣΙ ΑΤΤΙΚΗΣ']},
+ {n:'GMT VOYAGER ΜΟΝΟΠΡΟΣΩΠΗ Α Ε',a:['ΛΕΩΦΟΡΟΣ ΚΗΦΙΣΙΑΣ 6-8 - ΜΑΡΟΥΣΙ']},
+ {n:'ΔΕΗ HUB',a:['ΧΑΛΚΟΚΟΝΔΥΛΗ 30 - ΑΘΗΝΑ']},
+ {n:'ΥΦΑΝΤΗΣ ΕΥΑΓΓΕΛΟΣ - IFANTIS CARS 4U ΜΟΝΟΠΡΟΣΩΠΗ ΙΚΕ',a:['ΑΛ ΠΑΝΑΓΟΥΛΗ 26, ΑΓ ΠΑΡΑΣΚΕΥΗ']},
+ {n:'RSM Greece Business Advisors ΕΠΕ',a:['Πατρόκλου 1 & Παραδείσου, Μαρούσι 15125']},
+ {n:'IMCD GREECE ΜΟΝΟΠΡΟΣΩΠΗ ΙΔΙΩΤΙΚΗ ΚΕΦΑΛΑΙΟΥΧΙΚΗ ΕΤΑΙΡΙΑ',a:['ΠΑΤΡΟΚΛΟΥ 1 - ΜΑΡΟΥΣΙ TK 15125']},
+ {n:'GMT ΕΛΛΗΝΙΚΗ ΕΙΣΑΓΩΓΙΚΗ ΚΑΙ ΕΜΠΟΡΙΚΗ ΜΟΝ. Α.Ε.',a:['Λ ΚΗΦΙΣΙΑΣ 6-8 - ΜΑΡΟΥΣΙ']},
+ {n:'URBAN SUITES ΙΔΙΩΤΙΚΗ ΚΕΦΑΛΑΙΟΥΧΙΚΗ ΕΤΑΙΡΕΙΑ',a:['ΚΕΑΣ 1 - ΧΑΛΑΝΔΡΙ']},
+ {n:'ΣΑΒΒΑΣ ΑΘΑΝΑΣΙΑΔΗΣ Κ ΣΙΑ ΙΚΕ',a:['ΝΕΑΠΟΛΕΩΣ 50 - ΜΑΡΟΥΣΙ']},
+ {n:'ΚΑΛΑΙΤΖΑΚΗΣ ΓΕΩΡΓΙΟΣ ΑΝΤΙΠΡΟΣΩΠΕΙΕΣ ΟΙΚΩΝ ΕΞΩΤΕΡΙΚΟΥ',a:['Λ ΚΗΦΙΣΙΑΣ 6-8 - ΜΑΡΟΥΣΙ']},
+ {n:'LIGORI ALTIM MIHAL ΨΗΤΟΠΩΛΕΙΟ – ΣΟΥΒΛΑΤΖΙΔΙΚΟ',a:['ΤΑΤΟΙΟΥ 122']},
+ {n:'S & K ΙΔΙΩΤΙΚΗ ΚΕΦΑΛΑΙΟΥΧΙΚΗ ΕΤΑΙΡΙΑ',a:['ΑΓΙΟΣ ΔΗΜΗΤΡΙΟΣ, ΑΓΙΟΥ ΚΩΝΣΤΑΝΤΙΝΟΥ & ΕΛΕΝΗΣ 24']},
+ {n:'Ελευθέρα Αποστολική Εκκλησία Πεντηκοστής',a:['Δρυμώνος 7, Κηφισιά 145 64']},
+ {n:'ΠΑΥΛΙΑΣ',a:['ΔΩΔΕΚΑΝΗΣΟΥ 104 ΠΕΡΙΣΤΕΡΙ']}
+];
+const OTHER=[
+ {n:'ΠΕΛΩΝΗΣ Λ ΣΟΥΡΑ Μ Ο Ε',a:['ΔΩΔΕΚΑΝΗΣΟΥ 56 - ΠΕΡΙΣΤΕΡΙ']},
+ {n:'ΒΑΡΚΟ ΕΜΠΟΡΙΟ ΤΗΛΕΠΙΚΟΙΝΩΝΙΑΚΟΥ ΕΞΟΠΛΙΣΜΟΥ ΕΠΕ',a:['ΠΕΤΡΟΥ ΡΑΛΛΗ 240']},
+ {n:'ΕΥΔ ΕΠ Περιβάλλον και Αειφόρος Ανάπτυξη',a:['ΑΕΡΟΠΟΡΟΥ ΠΑΠΑΝΑΣΤΑΣΙΟΥ 34','ΚΟΝΙΑΡΗ 15']},
+ {n:'ΙΝΣΤΙΤΟΥΤΟ ΚΑΤΑ ΤΗΣ ΑΠΑΤΗΣ',a:['Εμμανουήλ Μπενάκη 5, Αθήνα 10564, γραφείο 605B']},
+ {n:'ΕΠΟΑΛΑΑ (ΕΥΔ ΜΕΤΑΦΟΡΕΣ)',a:['ΚΟΝΙΑΡΗ 15']},
+ {n:'ΚΑ ΑΔΕΜΗ ΜΑΡΓΑΡΙΤΑ',a:[]},
+ {n:'FERTIBERIA SA',a:['ΛΕΩΦΟΡΟΣ ΚΗΦΙΣΙΑΣ 280']},
+ {n:'ΣΚΟΡΔΙΛΗ ΜΑΡΟΥΣΑ ΙΑΤΡΙΚΗ ΕΤΕΡΟΡΡΥΘΜΗ ΕΤΑΙΡΕΙΑ',a:['ΦΙΛΑΔΕΛΦΕΩΣ 9, TK 11253']}
+];
+const ALL=[...ACTIVE,...OTHER];
+
+/* γρήγορες φράσεις για τις παρατηρήσεις */
+const PHRASES=['Επίσκεψη Τεχνικού Ασφαλείας.','Αυτοψία χώρων εργασίας.','Έλεγχος πυροσβεστήρων.','Έλεγχος φαρμακείου πρώτων βοηθειών.',
+  'Έλεγχος εξόδων κινδύνου και οδεύσεων διαφυγής.','Έλεγχος ηλεκτρολογικών πινάκων.','Έλεγχος χρήσης ΜΑΠ.','Ενημέρωση εργαζομένων σε θέματα ΥΑΕ.',
+  'Δεν διαπιστώθηκαν ελλείψεις.'];
+
+const INK='#1b2a8f';
+const $=id=>document.getElementById(id);
+const store={get(k){try{return localStorage.getItem(k)}catch(e){return null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const ids=['comp','inst','date','contact','t1','t2','notes','signer'];
+const today=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')};
+const grDate=s=>s?s.split('-').reverse().join('/'):'';
+const fmtTel=t=>t.replace(/^(\d{3})(\d{7})$/,'$1 $2').replace(/^(69\d)(\d{7})$/,'$1 $2');
+const norm=s=>String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').trim();
+const uniq=a=>[...new Set(a)];
+const byEl=(x,y)=>x.localeCompare(y,'el',{sensitivity:'base'});
+
+$('taName').textContent='Τεχνικός Ασφαλείας: '+TA.name;
+$('taSub').textContent='Α.Μ. '+TA.am+' · Κιν. '+fmtTel(TA.mob);
+
+/* ===== Ημερομηνία πάντα ηη/μμ/εεεε ===== */
+const _val=Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value');
+const CAL='<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg>';
+function toIso(s){const m=/^(\d{1,2})[\/.\-](\d{1,2})[\/.\-](\d{2}|\d{4})$/.exec(s.trim());if(!m)return '';
+  const d=+m[1],mo=+m[2],y=m[3].length===2?2000+(+m[3]):+m[3],dt=new Date(y,mo-1,d);
+  return dt.getFullYear()===y&&dt.getMonth()===mo-1&&dt.getDate()===d?y+'-'+String(mo).padStart(2,'0')+'-'+String(d).padStart(2,'0'):''}
+function maskDate(v){v=v.replace(/\/+/g,'/').replace(/^\//,'');const p=v.split('/');let d=(p[0]||'').replace(/\D/g,''),m=(p[1]||'').replace(/\D/g,''),y=p.slice(2).join('').replace(/\D/g,'');
+  if(d.length>2){m=d.slice(2)+m;d=d.slice(0,2)}if(m.length>2){y=m.slice(2)+y;m=m.slice(0,2)}y=y.slice(0,4);
+  let o=d;if(m||p.length>1||d.length===2)o+='/'+m;if(y||p.length>2||m.length===2)o+='/'+y;return o}
+function euroDate(inp){
+  const wrap=document.createElement('span');wrap.className='dfield';
+  const txt=document.createElement('input');txt.type='text';txt.inputMode='numeric';txt.placeholder='ηη/μμ/εεεε';txt.maxLength=10;txt.autocomplete='off';txt.id=inp.id+'_t';
+  const btn=document.createElement('button');btn.type='button';btn.className='calbtn';btn.innerHTML=CAL;btn.setAttribute('aria-label','Ημερολόγιο');
+  inp.replaceWith(wrap);wrap.append(txt,btn,inp);inp.classList.add('native');inp.tabIndex=-1;inp.setAttribute('aria-hidden','true');
+  const lab=document.querySelector('label[for="'+inp.id+'"]');if(lab)lab.htmlFor=txt.id;
+  Object.defineProperty(inp,'value',{configurable:true,get(){return _val.get.call(inp)},set(v){_val.set.call(inp,v);txt.value=grDate(v);txt.classList.remove('bad')}});
+  txt.value=grDate(_val.get.call(inp));
+  txt.addEventListener('input',e=>{
+    let v=txt.value.replace(/[^\d\/]/g,'');
+    if(!e.inputType||e.inputType.startsWith('insert'))v=maskDate(v);
+    txt.value=v;const iso=toIso(v);_val.set.call(inp,iso);txt.classList.toggle('bad',v.length===10&&!iso)});
+  txt.addEventListener('blur',()=>{const iso=toIso(txt.value);if(iso)txt.value=grDate(iso);txt.classList.toggle('bad',!!txt.value&&!iso)});
+  inp.addEventListener('change',()=>{txt.value=grDate(_val.get.call(inp));txt.classList.remove('bad')});
+  btn.onclick=()=>{try{inp.showPicker()}catch(_){inp.focus();inp.click()}};
+}
+euroDate($('date'));
+$('date').value=today();
+
+/* ===== Ώρες 24ωρες: δέχεται 9:30, 0930, 930, 9 ===== */
+function parseT(v){v=String(v||'').trim();let h,m;const x=/^(\d{1,2})[:.](\d{1,2})$/.exec(v);
+  if(x){h=+x[1];m=+x[2]}else if(/^\d{1,4}$/.test(v)){if(v.length<=2){h=+v;m=0}else{h=+v.slice(0,v.length-2);m=+v.slice(-2)}}else return '';
+  return h<24&&m<60?String(h).padStart(2,'0')+':'+String(m).padStart(2,'0'):''}
+const hhmm=m=>Math.floor(m/60)+':'+String(m%60).padStart(2,'0');
+function durMin(a,b){a=parseT(a);b=parseT(b);if(!a||!b)return null;let m=(+b.slice(0,2)*60+ +b.slice(3))-(+a.slice(0,2)*60+ +a.slice(3));if(m<0)m+=1440;return m}
+function updDur(){const m=durMin($('t1').value,$('t2').value);
+  $('dur').textContent=m!==null?'Διάρκεια επίσκεψης: '+hhmm(m)+' ώρες':'Οι ώρες είναι προαιρετικές· αν τις συμπληρώσεις, γράφονται στο δελτίο.'}
+['t1','t2'].forEach(id=>{const i=$(id);
+  i.addEventListener('input',e=>{if(e.inputType&&!e.inputType.startsWith('insert'))return;const d=i.value.replace(/\D/g,'').slice(0,4);
+    i.value=d.length===4?d.slice(0,2)+':'+d.slice(2):(d.length===3&&+d.slice(0,2)>23?d[0]+':'+d.slice(1):d);
+    i.classList.toggle('bad',i.value.length>=4&&!parseT(i.value));updDur()});
+  i.addEventListener('blur',()=>{const t=parseT(i.value);if(t)i.value=t;i.classList.toggle('bad',!!i.value&&!t);updDur()})});
+
+/* ===== Εταιρεία → εγκαταστάσεις, υπεύθυνος επικοινωνίας ===== */
+let autoInst='',autoContact='';
+const findComp=()=>{const v=norm($('comp').value);return v?ALL.find(x=>norm(x.n)===v):null};
+function onComp(){
+  const c=findComp();
+  if($('inst').value===autoInst){$('inst').value='';autoInst=''}
+  if(c&&c.a.length===1&&!$('inst').value){$('inst').value=autoInst=c.a[0]}
+  $('ihint').textContent=c&&c.a.length>1?'Η εταιρεία έχει '+c.a.length+' εγκαταστάσεις: πάτα ▾ για να διαλέξεις.':'';
+  /* ο υπεύθυνος που γράφτηκε την τελευταία φορά για αυτή την εταιρεία */
+  if($('contact').value===autoContact){$('contact').value='';autoContact=''}
+  const last=$('comp').value.trim()?store.get('ct:'+norm($('comp').value)):'';
+  if(last&&!$('contact').value){$('contact').value=autoContact=last}
+}
+$('contact').addEventListener('input',()=>{autoContact=''});
+
+const PICK={
+  comp:{title:'Εταιρεία',groups:()=>[['ΕΝΕΡΓΕΣ ΣΥΜΒΑΣΕΙΣ',ACTIVE.map(c=>c.n)],['ΛΟΙΠΕΣ ΕΤΑΙΡΕΙΕΣ',OTHER.map(c=>c.n)]],after:()=>onComp()},
+  inst:{title:'Εγκατάσταση',groups:()=>{const c=findComp();
+    return c&&c.a.length?[['ΕΓΚΑΤΑΣΤΑΣΕΙΣ ΕΤΑΙΡΕΙΑΣ',c.a]]:[['ΟΛΕΣ ΟΙ ΕΓΚΑΤΑΣΤΑΣΕΙΣ',uniq(ALL.flatMap(x=>x.a)).sort(byEl)]]},after:()=>{}}
+};
+const CHEV='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>';
+function clearAuto(id){if(id==='inst')autoInst=''}
+function hideSugg(id){const s=$(id+'_s');if(s){s.hidden=true;s.replaceChildren()}}
+function showSugg(id){
+  const el=$(id),s=$(id+'_s'),q=norm(el.value);
+  if(!q){hideSugg(id);return}
+  const all=uniq(PICK[id].groups().flatMap(g=>g[1]));
+  const starts=all.filter(n=>norm(n).startsWith(q)),inside=all.filter(n=>!norm(n).startsWith(q)&&norm(n).includes(q));
+  const list=[...starts,...inside].slice(0,8);
+  if(!list.length||(list.length===1&&norm(list[0])===q)){hideSugg(id);return}
+  s.replaceChildren(...list.map(n=>{const b=document.createElement('button');b.type='button';b.textContent=n;
+    b.addEventListener('pointerdown',e=>e.preventDefault());
+    b.onclick=()=>{el.value=n;hideSugg(id);clearAuto(id);PICK[id].after()};return b}));
+  s.hidden=false;
+}
+let pf=null;
+function drawPick(){
+  const cfg=PICK[pf],q=$('psearch').value.trim(),ql=norm(q),box=$('ppick'),cur=$(pf).value;box.replaceChildren();
+  const mk=(n,cls,val)=>{const b=document.createElement('button');b.type='button';b.textContent=n;if(cls)b.className=cls;
+    b.onclick=()=>choose(val===undefined?n:val);return b};
+  let total=0,exact=false;
+  cfg.groups().forEach(([label,list])=>{const f=list.filter(n=>!ql||norm(n).includes(ql));
+    if(!f.length)return;total+=f.length;if(f.some(n=>norm(n)===ql))exact=true;
+    const s=document.createElement('div');s.className='sep';s.textContent=label+' ('+f.length+')';
+    box.append(s,...f.map(n=>mk(n,n===cur?'cur':'')))});
+  if(q&&!exact)box.prepend(mk('Χρήση: «'+q+'»','free',q));
+  if(!total&&!q){const e=document.createElement('div');e.className='empty';e.textContent='Δεν υπάρχουν επιλογές. Γράψε ελεύθερα στο πεδίο.';box.append(e)}
+}
+function choose(v){const id=pf;$(id).value=v;clearAuto(id);closePick();PICK[id].after()}
+function openPick(id){hideSugg(id);pf=id;$('pmt').textContent=PICK[id].title;$('psearch').value='';drawPick();
+  $('pmodal').hidden=false;$('ppick').scrollTop=0;document.body.style.overflow='hidden';
+  const c=$('ppick').querySelector('.cur');if(c)c.scrollIntoView({block:'center'})}
+function closePick(){$('pmodal').hidden=true;document.body.style.overflow='';pf=null}
+function makeCombo(id){
+  const el=$(id),wrap=document.createElement('div'),btn=document.createElement('button'),sg=document.createElement('div');
+  wrap.className='combo';btn.type='button';btn.className='cbtn';btn.innerHTML=CHEV;btn.setAttribute('aria-label','Λίστα: '+PICK[id].title);
+  sg.className='sugg';sg.id=id+'_s';sg.hidden=true;
+  el.replaceWith(wrap);wrap.append(el,btn,sg);
+  el.autocomplete='off';el.setAttribute('autocorrect','off');el.setAttribute('autocapitalize','characters');
+  btn.onclick=()=>{el.blur();openPick(id)};
+  el.addEventListener('input',()=>{clearAuto(id);showSugg(id);PICK[id].after()});
+  el.addEventListener('focus',()=>showSugg(id));
+  el.addEventListener('blur',()=>setTimeout(()=>hideSugg(id),150));
+  el.addEventListener('keydown',e=>{if(e.key==='Escape')hideSugg(id);
+    if(e.key==='Enter'){const f=$(id+'_s').querySelector('button');if(!$(id+'_s').hidden&&f){e.preventDefault();f.click()}else hideSugg(id)}});
+}
+['comp','inst'].forEach(makeCombo);
+$('psearch').addEventListener('input',drawPick);
+$('psearch').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();const f=$('ppick').querySelector('button');if(f)f.click()}});
+$('pclose').onclick=closePick;
+$('pclear').onclick=()=>choose('');
+$('pmodal').addEventListener('click',e=>{if(e.target.id==='pmodal')closePick()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('pmodal').hidden)closePick()});
+
+/* ===== γρήγορες φράσεις ===== */
+$('chips').replaceChildren(...PHRASES.map(p=>{const b=document.createElement('button');b.type='button';b.textContent='+ '+p.replace(/\.$/,'');
+  b.onclick=()=>{const t=$('notes');const v=t.value.replace(/\s+$/,'');t.value=(v?v+'\n':'')+p;t.focus();t.setSelectionRange(t.value.length,t.value.length)};return b}));
+
+/* ===== φωτογραφίες ===== */
+const photos=[];
+function shrink(f){return new Promise((res,rej)=>{const u=URL.createObjectURL(f),im=new Image();
+  im.onload=()=>{const k=Math.min(1,1600/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);c.getContext('2d').drawImage(im,0,0,c.width,c.height);URL.revokeObjectURL(u);res({src:c.toDataURL('image/jpeg',.8),w:c.width,h:c.height})};
+  im.onerror=()=>{URL.revokeObjectURL(u);rej()};im.src=u})}
+function drawThumbs(){const t=$('thumbs');t.innerHTML='';photos.forEach((p,i)=>{const d=document.createElement('div'),im=document.createElement('img'),x=document.createElement('button');im.src=p.src;im.alt='Φωτογραφία '+(i+1);x.type='button';x.textContent='×';x.setAttribute('aria-label','Αφαίρεση φωτογραφίας '+(i+1));x.onclick=()=>{photos.splice(i,1);drawThumbs()};d.append(im,x);t.append(d)})}
+$('photo').onchange=async e=>{for(const f of e.target.files){try{photos.push(await shrink(f))}catch(_){say('Μία φωτογραφία δεν διαβάστηκε. Δοκίμασε JPG ή PNG.','err')}}drawThumbs();e.target.value=''};
+
+/* ===== υπογραφές (μπλε μελάνι, διάφανο φόντο ώστε να πατούν πάνω στη σφραγίδα) ===== */
+function Pad(cv){
+  const cx=cv.getContext('2d');let dr=false,signed=false,w=0,h=0;
+  function init(){const r=cv.getBoundingClientRect();if(!r.width||r.width===w||signed)return;
+    const k=window.devicePixelRatio||1;cv.width=r.width*k;cv.height=r.height*k;w=r.width;h=r.height;
+    cx.setTransform(k,0,0,k,0,0);cx.lineWidth=2.3;cx.lineCap='round';cx.lineJoin='round';cx.strokeStyle=INK}
+  const pos=e=>{const r=cv.getBoundingClientRect(),s=w?r.width/w:1;return[(e.clientX-r.left)/s,(e.clientY-r.top)/s]};
+  cv.addEventListener('pointerdown',e=>{init();dr=true;signed=true;cv.setPointerCapture(e.pointerId);const[x,y]=pos(e);cx.beginPath();cx.moveTo(x,y);cx.lineTo(x+.1,y+.1);cx.stroke()});
+  cv.addEventListener('pointermove',e=>{if(!dr)return;const[x,y]=pos(e);cx.lineTo(x,y);cx.stroke()});
+  ['pointerup','pointercancel'].forEach(n=>cv.addEventListener(n,()=>dr=false));
+  return{init,
+    clear(){cx.save();cx.setTransform(1,0,0,1,0,0);cx.clearRect(0,0,cv.width,cv.height);cx.restore();signed=false;w=0;init()},
+    /* κόβει το κενό γύρω από την υπογραφή */
+    img(){if(!signed)return '';const W=cv.width,H=cv.height,data=cx.getImageData(0,0,W,H).data;let x0=W,y0=H,x1=-1,y1=-1;
+      for(let y=0;y<H;y++)for(let x=0;x<W;x++)if(data[(y*W+x)*4+3]>8){if(x<x0)x0=x;if(x>x1)x1=x;if(y<y0)y0=y;if(y>y1)y1=y}
+      if(x1<0)return '';const p=8;x0=Math.max(0,x0-p);y0=Math.max(0,y0-p);x1=Math.min(W-1,x1+p);y1=Math.min(H-1,y1+p);
+      const o=document.createElement('canvas');o.width=x1-x0+1;o.height=y1-y0+1;o.getContext('2d').drawImage(cv,x0,y0,o.width,o.height,0,0,o.width,o.height);return o.toDataURL('image/png')},
+    load(src){return new Promise(res=>{const im=new Image();im.onload=()=>{signed=false;w=0;init();if(!w)return res();
+      cx.clearRect(0,0,w,h);const s=Math.min((w-16)/im.width,(h-16)/im.height,1/(window.devicePixelRatio||1));
+      cx.drawImage(im,(w-im.width*s)/2,(h-im.height*s)/2,im.width*s,im.height*s);signed=true;res()};im.onerror=()=>res();im.src=src})}}
+}
+const padC=Pad($('sigC')),padT=Pad($('sigT')),pads=[padC,padT];
+$('sigCclr').onclick=()=>padC.clear();$('sigTclr').onclick=()=>padT.clear();
+pads.forEach(p=>p.init());window.addEventListener('resize',()=>pads.forEach(p=>p.init()));
+/* αποθηκευμένη υπογραφή Τεχνικού Ασφαλείας */
+$('keepSig').checked=store.get('keepSig')==='1';
+$('keepSig').onchange=()=>{store.set('keepSig',$('keepSig').checked?'1':'0');if(!$('keepSig').checked)store.del('sigT')};
+const loadMySig=()=>{const s=$('keepSig').checked&&store.get('sigT');return s?padT.load(s):Promise.resolve()};
+loadMySig();
+$('stampOn').checked=store.get('stampOn')!=='0';
+$('stampOn').onchange=()=>store.set('stampOn',$('stampOn').checked?'1':'0');
+
+function say(t,k){$('msg').textContent=t;$('msg').className='msg'+(k?' '+k:'')}
+
+/* ===== PDF ===== */
+function lines(text,min){const ls=(text||'').split('\n');while(ls.length<min)ls.push('');return '<div class="txt">'+ls.map(l=>'<div>'+esc(l)+'</div>').join('')+'</div>'}
+function stampHtml(){return '<div class="stamp"><div>'+esc(TA.stampName)+'</div><div>'+esc(TA.title)+'</div><div>ΤΕΧΝΙΚΟΣ ΑΣΦΑΛΕΙΑΣ</div><div>ΑΜ '+esc(TA.am)+' ΚΙΝ: '+esc(TA.mob)+'</div></div>'}
+function buildSheet(d){
+  const dur=durMin(d.t1,d.t2);
+  const hrs=(d.t1||d.t2)?'<div class="f"><span class="k">Ώρα άφιξης – αναχώρησης:</span><span class="v">'+esc([d.t1,d.t2].filter(Boolean).join(' – '))+(dur!==null?'  ('+hhmm(dur)+' ώρες)':'')+'</span></div>':'';
+  $('sheet').innerHTML=
+   '<div class="top"><div class="tt"><b>Δελτίο Επισκέψεων</b><span>ΤΕΧΝΙΚΟΥ ΑΣΦΑΛΕΙΑΣ</span></div>'+
+   '<div class="ta"><b>'+esc(TA.name)+'</b><br>'+esc(TA.title)+'<br>Αρ. Μ. Τεχνικών Ασφάλειας: '+esc(TA.am)+'<br>'+esc(TA.addr)+'<br>Τηλ/Φαξ: '+esc(TA.tel)+' · Κιν: '+esc(TA.mob)+'<br>'+esc(TA.email)+'</div></div>'+
+   '<div class="f"><span class="k">Εταιρεία:</span><span class="v">'+esc(d.comp)+'</span></div>'+
+   '<div class="f"><span class="k">Εγκατάσταση:</span><span class="v">'+esc(d.inst)+'</span></div>'+
+   '<div class="f"><span class="k">Ημερομηνία Επίσκεψης:</span><span class="v">'+grDate(d.date)+'</span></div>'+
+   hrs+
+   '<div class="f"><span class="k">Όνομα Υπεύθυνου Επικοινωνίας:</span><span class="v">'+esc(d.contact)+'</span></div>'+
+   '<div class="pk">Παρατηρήσεις</div>'+lines(d.notes,hrs?11:12)+
+   (d.byta?'<div class="byta"><span class="cb on"></span>Καταχώρηση υποδείξεων στο Ηλεκτρονικό ΒΥΤΑ</div>':'')+
+   '<div class="sign"><div><div class="h">Τεχνικός Ασφαλείας</div><div class="s">Υπογραφή - Σφραγίδα</div><div class="ar">'+(d.stamp?stampHtml():'')+(d.sigT?'<img class="st" src="'+d.sigT+'" alt="">':'')+'</div></div>'+
+   '<div class="r"><div class="h">Για την Εγκατάσταση</div><div class="s">Υπογραφή - Σφραγίδα</div><div class="ar">'+(d.sigC?'<img class="sc" src="'+d.sigC+'" alt="">':'')+(d.signer?'<div class="nm">'+esc(d.signer)+'</div>':'')+'</div></div></div>'+
+   '<div class="foot"><span>'+esc(TA.name)+' · Τεχνικός Ασφαλείας · Α.Μ. '+esc(TA.am)+'</span><span>'+esc(TA.email)+' · '+esc(TA.mob)+'</span></div>'+
+   (d.nphotos?'<div class="foot" style="border:0;margin-top:2px;padding:0">Συνημμένες φωτογραφίες: '+d.nphotos+' (στις επόμενες σελίδες)</div>':'');
+}
+async function makePdf(d){
+  buildSheet(d);
+  try{await document.fonts.ready}catch(_){}
+  const imgs=[...$('sheet').querySelectorAll('img')];await Promise.all(imgs.map(i=>i.complete?0:new Promise(r=>{i.onload=i.onerror=r})));
+  const canvas=await html2canvas($('sheet'),{scale:2,backgroundColor:'#ffffff',logging:false});
+  const {jsPDF}=window.jspdf;const pdf=new jsPDF({unit:'mm',format:'a4',compress:true});
+  const pw=210,ph=297,pxPerPage=Math.floor(canvas.width*ph/pw);
+  if(canvas.height<=pxPerPage*1.3){
+    /* χωράει σε μία Α4 (με μικρή σμίκρυνση αν χρειαστεί) */
+    const k=Math.min(1,pxPerPage/canvas.height),w=pw*k,h=canvas.height*pw/canvas.width*k;
+    pdf.addImage(canvas.toDataURL('image/jpeg',.92),'JPEG',(pw-w)/2,0,w,h);
+  }else{
+    const sh=$('sheet'),top0=sh.getBoundingClientRect().top,k=canvas.height/sh.offsetHeight;
+    const cuts=[...sh.querySelectorAll('.txt>div,.f,.pk,.byta,.sign,.foot,.top')].map(e=>Math.round((e.getBoundingClientRect().bottom-top0)*k)).sort((a,b)=>a-b);
+    const mm=canvas.width/pw,margin=10*mm;
+    for(let y=0,first=true;y<canvas.height-2;first=false){
+      const room=first?pxPerPage-margin:pxPerPage-2*margin;let end=Math.min(y+room,canvas.height);
+      if(end<canvas.height){const c=cuts.filter(v=>v>y+room*.5&&v<=end).pop();if(c)end=c}
+      const h=end-y,s=document.createElement('canvas');s.width=canvas.width;s.height=h;
+      const sc=s.getContext('2d');sc.fillStyle='#fff';sc.fillRect(0,0,s.width,s.height);sc.drawImage(canvas,0,y,canvas.width,h,0,0,canvas.width,h);
+      if(!first)pdf.addPage();pdf.addImage(s.toDataURL('image/jpeg',.92),'JPEG',0,first?0:10,pw,h*pw/canvas.width);
+      y=end;
+    }
+  }
+  const boxW=180,boxH=125,mx=15;
+  photos.forEach((p,i)=>{if(i%2===0)pdf.addPage();const top=i%2===0?18:155;
+    const k=Math.min(boxW/p.w,boxH/p.h),w=p.w*k,h=p.h*k;pdf.addImage(p.src,'JPEG',mx+(boxW-w)/2,top+(boxH-h)/2,w,h)});
+  return pdf.output('blob');
+}
+function collect(){
+  const d={};ids.forEach(i=>d[i]=$(i).value.trim());
+  d.t1=parseT(d.t1)||d.t1;d.t2=parseT(d.t2)||d.t2;
+  d.byta=$('byta').checked;d.stamp=$('stampOn').checked;
+  d.sigC=padC.img();d.sigT=padT.img();d.nphotos=photos.length;return d}
+
+let lastPdf=null,lastName='';
+const safe=(s,n)=>s.replace(/[\\/:*?"<>|]+/g,' ').trim().replace(/\s+/g,'_').slice(0,n||40);
+function finishOut(d){
+  const c=ALL.find(x=>norm(x.n)===norm(d.comp));
+  lastName=['TA',safe(d.comp,28),c&&c.a.length>1&&d.inst?safe(d.inst,20):'',grDate(d.date).replace(/\//g,'-')].filter(Boolean).join('_')+'.pdf';
+  $('esub').value='Δελτίο Επίσκεψης Τεχνικού Ασφαλείας '+grDate(d.date)+' – '+d.comp;
+  $('ebody').value='Καλησπέρα σας,\n\nσας αποστέλλουμε συνημμένο το Δελτίο Επίσκεψης Τεχνικού Ασφαλείας της '+grDate(d.date)+
+    (d.inst?' για την εγκατάσταση '+d.inst:'')+'.\n\nΜε εκτίμηση,\n'+TA.name+'\nΤεχνικός Ασφαλείας\nΚιν. '+TA.mob+'\n'+TA.email;
+}
+$('make').onclick=async()=>{
+  const d=collect();
+  if(!d.comp){say('Συμπλήρωσε την εταιρεία.','err');$('comp').scrollIntoView({block:'center'});return}
+  if(!d.date){say('Συμπλήρωσε σωστά την ημερομηνία (ηη/μμ/εεεε).','err');$('date_t').scrollIntoView({block:'center'});$('date_t').classList.add('bad');return}
+  if(!window.jspdf||!window.html2canvas){say('Δεν φορτώθηκε το εργαλείο PDF. Άνοιξε ξανά την εφαρμογή.','err');return}
+  $('make').disabled=true;say('Δημιουργία PDF…');
+  try{
+    lastPdf=await makePdf(d);
+    finishOut(d);
+    if(d.contact)store.set('ct:'+norm(d.comp),d.contact);
+    if($('keepSig').checked&&d.sigT)store.set('sigT',d.sigT);
+    $('done').hidden=false;prepLink(d);say('✓ Το PDF δημιουργήθηκε ('+Math.round(lastPdf.size/1024)+' KB).','ok');
+    $('done').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});
+  }catch(e){console.error(e);say('Δεν δημιουργήθηκε το PDF. Δοκίμασε με λιγότερες φωτογραφίες.','err')}
+  finally{$('make').disabled=false}
+};
+
+/* ===== αποθήκευση στη συσκευή & αποστολή ===== */
+const isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+const isMobile=isIOS||/Android|Mobi/i.test(navigator.userAgent);
+const pdfFile=()=>new File([lastPdf],lastName,{type:'application/pdf'});
+const canShareFile=()=>{try{return !!(navigator.canShare&&navigator.canShare({files:[pdfFile()]}))}catch(_){return false}};
+function downloadPdf(){
+  const u=URL.createObjectURL(lastPdf),a=document.createElement('a');
+  a.href=u;a.download=lastName;a.rel='noopener';document.body.append(a);a.click();a.remove();
+  setTimeout(()=>URL.revokeObjectURL(u),60000);
+}
+async function doSave(){
+  if(!lastPdf)return;
+  if(!isMobile&&window.showSaveFilePicker){
+    try{const h=await window.showSaveFilePicker({suggestedName:lastName,types:[{description:'PDF',accept:{'application/pdf':['.pdf']}}]});
+      const w=await h.createWritable();await w.write(lastPdf);await w.close();say('✓ Το PDF αποθηκεύτηκε.','ok');return}
+    catch(e){if(e&&e.name==='AbortError'){say('Η αποθήκευση ακυρώθηκε.','');return}}
+  }
+  if(isIOS&&canShareFile()){
+    try{await navigator.share({files:[pdfFile()]});say('✓ Έτοιμο. Αν διάλεξες «Αποθήκευση στα Αρχεία», το PDF είναι στην εφαρμογή Αρχεία.','ok');return}
+    catch(e){if(e&&e.name==='AbortError'){say('Η αποθήκευση ακυρώθηκε.','');return}}
+  }
+  try{downloadPdf();say('✓ Το PDF αποθηκεύτηκε στις Λήψεις (Downloads) της συσκευής.','ok')}
+  catch(_){say('Η αποθήκευση απέτυχε. Δοκίμασε ξανά.','err')}
+}
+async function doShare(){
+  if(!lastPdf)return;
+  if(canShareFile()){
+    try{await navigator.share({files:[pdfFile()],title:$('esub').value,text:$('ebody').value});say('✓ Το PDF στάλθηκε στην εφαρμογή που διάλεξες.','ok');return}
+    catch(e){if(e&&e.name==='AbortError'){say('Η αποστολή ακυρώθηκε.','');return}}
+  }
+  try{downloadPdf();say('Η συσκευή δεν υποστηρίζει άμεση αποστολή: το PDF αποθηκεύτηκε στις Λήψεις, επισύναψέ το στο email.','ok')}
+  catch(_){say('Η αποστολή απέτυχε. Δοκίμασε ξανά.','err')}
+}
+$('save').onclick=doSave;$('share').onclick=doShare;
+$('saveinfo').textContent=isIOS?'Στο iPhone ανοίγει μενού: διάλεξε «Αποθήκευση στα Αρχεία».':isMobile?'Το PDF αποθηκεύεται στις Λήψεις (Downloads) του κινητού.':'Επίλεξε τον φάκελο όπου θα αποθηκευτεί.';
+document.querySelectorAll('[data-copy]').forEach(b=>b.onclick=async()=>{const el=$(b.dataset.copy);
+  try{await navigator.clipboard.writeText(el.value);b.textContent='✓';setTimeout(()=>b.textContent='Αντιγραφή',1500)}
+  catch(_){el.focus();el.select()}});
+
+$('newb').onclick=()=>{$('confirm').hidden=false;$('newb').hidden=true};
+$('no2').onclick=()=>{$('confirm').hidden=true;$('newb').hidden=false};
+$('yes').onclick=()=>{ids.forEach(i=>$(i).value='');$('date').value=today();$('byta').checked=false;
+  autoInst='';autoContact='';onComp();updDur();photos.length=0;drawThumbs();pads.forEach(p=>p.clear());loadMySig();
+  lastPdf=null;$('done').hidden=true;say('');$('confirm').hidden=true;$('newb').hidden=false;window.scrollTo(0,0)};
+
+/* ===== link δελτίου: όλα τα στοιχεία μέσα στο link (χωρίς φωτογραφίες) ===== */
+const b64u=u8=>{let s='';for(let i=0;i<u8.length;i+=0x8000)s+=String.fromCharCode.apply(null,u8.subarray(i,i+0x8000));return btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')};
+const ub64=t=>{t=t.replace(/-/g,'+').replace(/_/g,'/');const s=atob(t);const u=new Uint8Array(s.length);for(let i=0;i<s.length;i++)u[i]=s.charCodeAt(i);return u};
+async function zip(u8,mode){const cs=mode?new DecompressionStream('deflate-raw'):new CompressionStream('deflate-raw');const st=new Blob([u8]).stream().pipeThrough(cs);return new Uint8Array(await new Response(st).arrayBuffer())}
+/* μικραίνει την υπογραφή για το link, κρατώντας το διάφανο φόντο */
+function smallSig(src){return new Promise(res=>{if(!src)return res('');const im=new Image();im.onload=()=>{const k=Math.min(1,360/im.width),c=document.createElement('canvas');c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);c.getContext('2d').drawImage(im,0,0,c.width,c.height);let u=c.toDataURL('image/webp',.6);if(!u.startsWith('data:image/webp'))u=c.toDataURL('image/png');res(u)};im.onerror=()=>res('');im.src=src})}
+let linkUrl='',linkJob=null;
+function prepLink(d){linkUrl='';$('linkbox').hidden=true;$('linkb').textContent='Αντιγραφή link δελτίου';
+  linkJob=(async()=>{const x=Object.assign({},d,{v:1,nphotos:0});x.sigC=await smallSig(d.sigC);x.sigT=await smallSig(d.sigT);
+    const raw=new TextEncoder().encode(JSON.stringify(x));let t;
+    try{t='z'+b64u(await zip(raw,0))}catch(_){t='j'+b64u(raw)}
+    linkUrl=location.origin+location.pathname+'#r='+t;
+    $('linkinfo').textContent='Όποιος ανοίξει το link βλέπει το δελτίο και κατεβάζει το PDF.'+(photos.length?' Οι φωτογραφίες δεν περιλαμβάνονται στο link· στείλ’ τες με το PDF.':'');
+    return linkUrl})();}
+$('linkb').onclick=async()=>{const u=linkUrl||await linkJob;if(!u)return;
+  try{await navigator.clipboard.writeText(u);$('linkb').textContent='✓ Το link αντιγράφηκε';say('✓ Το link αντιγράφηκε. Επικόλλησέ το σε Viber, WhatsApp, email κ.λπ.','ok');setTimeout(()=>$('linkb').textContent='Αντιγραφή link δελτίου',2500)}
+  catch(_){const b=$('linkbox');b.value=u;b.hidden=false;b.focus();b.select();say('Κράτησε πατημένο το link παρακάτω και διάλεξε «Αντιγραφή».','')}};
+
+async function openViewer(t){
+  $('formwrap').hidden=true;$('viewer').hidden=false;
+  const vs=(m,k)=>{$('vmsg').textContent=m;$('vmsg').className='msg'+(k?' '+k:'')};
+  let d;
+  try{const raw=t[0]==='z'?await zip(ub64(t.slice(1)),1):ub64(t.slice(1));d=JSON.parse(new TextDecoder().decode(raw))}
+  catch(_){vs('Το link δεν είναι πλήρες. Ζήτησε να σου το ξαναστείλουν (ίσως κόπηκε στην αντιγραφή).','err');return}
+  $('vtitle').textContent='ΕΠΙΣΚΕΨΗ '+grDate(d.date)+' – '+(d.comp||'');
+  $('vsub').textContent=[d.inst,'Τεχνικός Ασφαλείας: '+TA.name].filter(Boolean).join(' · ');
+  document.title='Δελτίο Επίσκεψης '+grDate(d.date)+' – '+(d.comp||'');
+  photos.length=0;vs('Δημιουργία PDF…');
+  try{
+    if(!window.jspdf||!window.html2canvas)throw 0;
+    lastPdf=await makePdf(d);finishOut(d);
+    const pv=$('pv'),sh=$('sheet');pv.append(sh);
+    const fit=()=>{const k=pv.clientWidth/794;sh.style.transform='scale('+k+')';pv.style.height=Math.ceil(sh.offsetHeight*k)+'px'};fit();addEventListener('resize',fit);
+    $('vsave').disabled=false;$('vshare').disabled=false;vs('');
+  }catch(_){vs('Δεν δημιουργήθηκε το PDF. Άνοιξε ξανά το link.','err')}
+  const swap=fn=>{$('msg').id='msg_';$('vmsg').id='msg';fn().finally(()=>{$('msg').id='vmsg';$('msg_').id='msg'})};
+  $('vsave').onclick=()=>swap(doSave);$('vshare').onclick=()=>swap(doShare);
+}
+$('vnew').onclick=()=>{location.href=location.pathname};
+{const h=location.hash.match(/^#r=(.+)$/);if(h)openViewer(h[1])}
+
+onComp();
+if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+</script>
+</body></html>
